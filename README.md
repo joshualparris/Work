@@ -40,6 +40,7 @@ npm run lint
 - Use the pay calculator tab to update Avance salary, Census hours, BCCS and Sunglass Hut values.
 - Toggle Census confirmed / not confirmed.
 - Toggle Avance Mon/Wed and whether Avance 0.8 starts after Census.
+- Toggle alternate Census start to switch the date to 12 August.
 - Use export/import JSON to save and restore custom scenarios.
 
 ## Comparing pay

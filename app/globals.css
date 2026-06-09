@@ -38,3 +38,35 @@ select {
 ::selection {
   background: rgba(96, 165, 250, 0.25);
 }
+
+@media print {
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  main,
+  .shadow-glow {
+    box-shadow: none !important;
+  }
+
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  .no-print {
+    display: none !important;
+  }
+
+  .rounded-3xl,
+  .bg-slate-950\/90,
+  .bg-slate-900\/90 {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+  }
+
+  .print-break {
+    page-break-inside: avoid;
+  }
+}

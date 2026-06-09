@@ -160,7 +160,7 @@ function computeScenario(scenario: Scenario) {
 function buildTimeline(scenario: Scenario) {
   const startDate = new Date(2026, 5, 10);
   const endDate = new Date(2026, 9, 2);
-  const censusStart = scenario.useAltCensusStart ? new Date(2026, 7, 12) : new Date(2026, 6, 9);
+  const censusStart = parseDate(scenario.censusStart);
   const censusEnd = parseDate(scenario.censusEnd);
   const days: Array<{ date: Date; label: string; badge: string }> = [];
 
@@ -338,7 +338,13 @@ export default function Home() {
   ].filter(Boolean) as string[];
 
   function handleField<K extends keyof Scenario>(key: K, value: Scenario[K]) {
-    setScenario((prev) => ({ ...prev, [key]: value }));
+    setScenario((prev) => {
+      const next = { ...prev, [key]: value } as Scenario;
+      if (key === 'useAltCensusStart') {
+        next.censusStart = value ? '2026-08-12' : '2026-07-09';
+      }
+      return next;
+    });
   }
 
   function handleExport() {
@@ -368,6 +374,10 @@ export default function Home() {
     reader.readAsText(file);
   }
 
+  function handlePrint() {
+    window.print();
+  }
+
   function handleReset() {
     setScenario(defaultScenario);
   }
@@ -386,7 +396,7 @@ export default function Home() {
               <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white">Practical transition planning for Josh</h1>
               <p className="mt-3 max-w-2xl text-slate-300">Compare DCS finish dates, Census work, Avance options, backup roles, rest and weekly income. Save scenarios in localStorage and export as JSON.</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
+            <div className="grid gap-3 sm:grid-cols-3 lg:gap-4 no-print">
               <button
                 type="button"
                 onClick={handleExport}
@@ -398,10 +408,17 @@ export default function Home() {
                 Import scenario
                 <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
               </label>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="rounded-2xl bg-slate-700 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-slate-600"
+              >
+                Print current plan
+              </button>
             </div>
           </div>
           {importError ? <p className="mt-4 rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{importError}</p> : null}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap no-print">
             {['dashboard', 'timeline', 'calculator', 'decisions', 'notes'].map((tab) => (
               <button
                 key={tab}
@@ -535,6 +552,23 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              <div className="mt-6 rounded-3xl border border-slate-800/80 bg-slate-900/90 p-6">
+                <h3 className="text-lg font-semibold text-white">Weekly pattern overview</h3>
+                <div className="mt-4 space-y-4 text-slate-300">
+                  <div className="rounded-3xl bg-slate-950/90 p-4">
+                    <p className="font-semibold text-white">Before Census / while at DCS</p>
+                    <p className="mt-2 text-sm leading-6">Monday Avance, Tuesday off, Wednesday Avance, Thursday DCS, Friday DCS, Saturday family/off, Sunday church morning/rest.</p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-950/90 p-4">
+                    <p className="font-semibold text-white">Plan A — Census</p>
+                    <p className="mt-2 text-sm leading-6">Monday Avance, Tuesday off, Wednesday Avance, Thursday Census, Friday Census, Saturday Census, Sunday church morning with possible Census afternoon.</p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-950/90 p-4">
+                    <p className="font-semibold text-white">Plan B — No Census</p>
+                    <p className="mt-2 text-sm leading-6">Monday Avance, Tuesday off, Wednesday Avance, Thursday/Friday DCS until 17 July, then from 20 July Avance 0.8 with Tuesday off and Sunday church.</p>
+                  </div>
+                </div>
+              </div>
               <div className="mt-6 overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-900/80">
                 <div className="grid grid-cols-4 gap-0 border-b border-slate-800 px-4 py-3 text-sm text-slate-400 sm:grid-cols-6">
                   <span>Date</span>
@@ -636,7 +670,7 @@ export default function Home() {
                       className="mt-3 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none"
                     />
                   </label>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <label className="inline-flex items-center gap-3 rounded-3xl bg-slate-900/90 p-4">
                       <input
                         type="checkbox"
@@ -654,6 +688,15 @@ export default function Home() {
                         className="h-5 w-5 rounded border-slate-700 bg-slate-800 text-sky-500"
                       />
                       <span className="text-sm text-slate-300">Keep Avance Mon/Wed</span>
+                    </label>
+                    <label className="inline-flex items-center gap-3 rounded-3xl bg-slate-900/90 p-4">
+                      <input
+                        type="checkbox"
+                        checked={scenario.useAltCensusStart}
+                        onChange={(event) => handleField('useAltCensusStart', event.target.checked)}
+                        className="h-5 w-5 rounded border-slate-700 bg-slate-800 text-cyan-500"
+                      />
+                      <span className="text-sm text-slate-300">Use alternate Census start 12 Aug</span>
                     </label>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
